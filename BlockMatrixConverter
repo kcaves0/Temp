@@ -1,0 +1,20 @@
+# Import necessary functions from MatrixUtils and SparseMatrixHandler
+from MatrixUtils import identifyBlocks, moveBlockTo, isOnBorder
+from SparseMatrixHandler import convertToBlockAlmostBordered, printMatrix
+ 
+# Main class to handle the conversion of a sparse matrix to a block almost bordered diagonal matrix
+class BlockMatrixConverter:
+    def __init__(self, matrix):
+        self.matrix = matrix
+ 
+    def convert(self):
+        # Convert the sparse matrix to a block almost bordered diagonal matrix
+        return convertToBlockAlmostBordered(self.matrix)
+ 
+    def displayConvertedMatrix(self):
+        # Convert the matrix first
+        convertedMatrix = self.convert()
+       
+        # Print the converted matrix
+        print("Converted Matrix:")
+        printMatrix(convertedMatrix)
