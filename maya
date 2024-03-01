@@ -1,0 +1,118 @@
+import numpy as np
+ 
+# Example sparse matrix
+matrix = [
+        [1, 0, 0, 2, 2],
+        [0, 4, 0, 0, 2],
+        [3, 4, 5, 7, 8],
+        [3, 5, 8, 4, 8],
+        [3, 0, 0, 0, 4]
+    ]
+ 
+# Function to check if a given cell (i, j) is part of a block
+def isPartOfBlock(matrix, i, j):
+    if matrix[i][j] == 0:
+        return False
+    # Check surrounding cells to determine if it's part of a larger block
+    surroundingCells = [(i-1, j), (i+1, j), (i, j-1), (i, j+1)]
+    for cell in surroundingCells:
+        x, y = cell
+        if 0 <= x < len(matrix) and 0 <= y < len(matrix[0]) and matrix[x][y] != 0:
+            return True
+    return False
+ 
+# Helper function to explore and return cells belonging to a block
+def exploreBlock(matrix, i, j, visited):
+    if i < 0 or i >= len(matrix) or j < 0 or j >= len(matrix[0]) or visited[i][j] or matrix[i][j] == 0:
+        return []
+    visited[i][j] = True
+    block = [(i, j)]
+    # Explore neighboring cells recursively
+    block += exploreBlock(matrix, i-1, j, visited)
+    block += exploreBlock(matrix, i+1, j, visited)
+    block += exploreBlock(matrix, i, j-1, visited)
+    block += exploreBlock(matrix, i, j+1, visited)
+    return block
+ 
+# Function to identify all blocks in the matrix
+def identifyBlocks(matrix):
+    visited = [[False for _ in range(len(matrix[0]))] for _ in range(len(matrix))]
+    blocks = []
+    for i in range(len(matrix)):
+        for j in range(len(matrix[0])):
+            if not visited[i][j] and isPartOfBlock(matrix, i, j):
+                block = exploreBlock(matrix, i, j, visited)
+                blocks.append(block)
+    return blocks
+ 
+# Function to check if a cell is on the matrix border
+def isOnBorder(matrix, i, j):
+    return i == 0 or j == 0 or i == len(matrix)-1 or j == len(matrix[0])-1
+ 
+# Function to move a block to a specified location in a new matrix
+def moveBlockTo(matrix, block, newRow, newCol):
+    newMatrix = [[0 for _ in range(len(matrix[0]))] for _ in range(len(matrix))]
+    # Assuming block is a list of tuples (i, j) indicating cell positions
+    # and matrix is the new matrix where the block will be moved
+    for cell in block:
+        i, j = cell
+        # Calculate new positions based on newRow and newCol offsets
+        newI = newRow + (i - block[0][0])
+        newJ = newCol + (j - block[0][1])
+        newMatrix[newI][newJ] = matrix[i][j]  # Assuming originalMatrix is globally accessible or passed as an argument
+    return newMatrix
+ 
+# Function to convert sparse matrix to block almost bordered diagonal matrix
+def convertToBlockAlmostBordered(newMatrix):
+    # Identify all blocks in the original sparse matrix
+    blocks = identifyBlocks(newMatrix)
+ 
+    # Create a new matrix of the same dimensions filled with zeros
+    newMatrix2 = [[0 for _ in range(len(newMatrix[0]))] for _ in range(len(newMatrix))]
+ 
+    # Variables to keep track of where to place the next block on the diagonal
+    nextDiagonalRow = 0
+    nextDiagonalCol = 0
+ 
+    # Place each block on the diagonal of the new matrix, except the first and last which go on the horizontal ends
+    for index, block in enumerate(blocks):
+        if index == 0:
+            # Move first block to the leftmost end
+            newMatrix2 = moveBlockTo(newMatrix2, block, 0, 0)
+        elif index == len(blocks) - 1:
+            # Move last block to the rightmost end, assuming blocks are not larger than the matrix dimensions
+            newMatrix2 = moveBlockTo(newMatrix2, block, 0, len(newMatrix[0]) - len(block[0]))
+        else:
+            # Move block to the next position on the diagonal
+            newMatrix2 = moveBlockTo(newMatrix2, block, nextDiagonalRow, nextDiagonalCol)
+            # Update the next diagonal position, assuming square blocks for simplicity
+            nextDiagonalRow += len(block)
+            nextDiagonalCol += len(block[0])
+ 
+    return newMatrix2
+ 
+# Function to print matrix for visualization
+def printMatrix(newMatrix2):
+    for row in newMatrix2:
+        print(' '.join(str(cell) for cell in row))
+ 
+class BlockMatrixConverter:
+    def __init__(self, matrix):
+        self.matrix = matrix
+ 
+    def convert(self):
+        # Convert the sparse matrix to a block almost bordered diagonal matrix
+        return convertToBlockAlmostBordered(self.matrix)
+ 
+    def displayConvertedMatrix(self):
+        # Convert the matrix first
+        convertedMatrix = self.convert()
+ 
+        # Print the converted matrix
+        print("Converted Matrix:")
+        printMatrix(convertedMatrix)
+ 
+# Example usage
+converter = BlockMatrixConverter(matrix)
+converter.displayConvertedMatrix()
+ 
