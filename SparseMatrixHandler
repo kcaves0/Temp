@@ -1,0 +1,36 @@
+# Import necessary functions from MatrixUtils
+from MatrixUtils import identifyBlocks, moveBlockTo, isOnBorder
+ 
+# Function to convert sparse matrix to block almost bordered diagonal matrix
+def convertToBlockAlmostBordered(matrix):
+    # Identify all blocks in the original sparse matrix
+    blocks = identifyBlocks(matrix)
+   
+    # Create a new matrix of the same dimensions filled with zeros
+    newMatrix = [[0 for _ in range(len(matrix[0]))] for _ in range(len(matrix))]
+   
+    # Variables to keep track of where to place the next block on the diagonal
+    nextDiagonalRow = 0
+    nextDiagonalCol = 0
+   
+    # Place each block on the diagonal of the new matrix, except the first and last which go on the horizontal ends
+    for index, block in enumerate(blocks):
+        if index == 0:
+            # Move first block to the leftmost end
+            moveBlockTo(newMatrix, block, 0, 0)
+        elif index == len(blocks) - 1:
+            # Move last block to the rightmost end, assuming blocks are not larger than the matrix dimensions
+            moveBlockTo(newMatrix, block, 0, len(newMatrix[0]) - len(block[0]))
+        else:
+            # Move block to the next position on the diagonal
+            moveBlockTo(newMatrix, block, nextDiagonalRow, nextDiagonalCol)
+            # Update the next diagonal position, assuming square blocks for simplicity
+            nextDiagonalRow += len(block)
+            nextDiagonalCol += len(block[0])
+   
+    return newMatrix
+ 
+# Function to print matrix for visualization
+def printMatrix(matrix):
+    for row in matrix:
+        print(' '.join(str(cell) for cell in row))
